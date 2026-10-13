@@ -1,12 +1,8 @@
 # ClassicsChat
 
-A specialized language model engineering suite designed to cultivate **authentic, idiomatic, and realistic conversational Classical Latin and Ancient Greek**.
+A defunct failed project that attempted to LoRA my way into a usable Latin and Ancient Greek chatbot.
 
-Unlike standard models that speak like rigid 3rd-person historical texts or translate modern English expressions literally into Latin and Greek (calques/anglicisms), ClassicsChat grounds conversation in authentic classical dialogue registers:
-- **Latin**: *Sermo cotidianus* and *sermo familiaris* (Plautus, Terence, Cicero's letters, Erasmus's *Colloquia*, Corderius, Adler's direct method).
-- **Ancient Greek**: Classical Attic dialogue and dialectic (Plato, Xenophon, Lucian, Aristophanes, Rouse's direct method).
-
----
+All of the data is compiled from Perseus, thelatinlibrary.com, the Bibliotheca Augustana, the Alpheios Project, and OCR'd Archive.org books. I do believe this is one of the larger repositories of classical literature out there, but I own none of it and make no claim to it.
 
 ## Workspace Structure
 
