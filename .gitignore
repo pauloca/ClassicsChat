@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large binary checkpoints & archives (>100MB breaks GitHub push)
+*.zip
+*.tar.gz
+*.safetensors
+*.bin
+*.pt
+*.pth
+model/
+checkpoint-*/
+
+# Massive pretraining JSONL files (>100MB hard GitHub limit)
+data/processed/classical_pretrain_chunks.jsonl
+data/processed/perseus_ancient_greek.jsonl
+data/raw/
+.git/
+
+# Environments & virtualenvs
+.env
+.venv
+env/
+venv/
+ENV/
+
+# OS specific
+Thumbs.db
+Desktop.ini
+.DS_Store

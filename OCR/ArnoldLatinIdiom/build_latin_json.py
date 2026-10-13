@@ -1,0 +1,2114 @@
+import json
+import unicodedata
+from pathlib import Path
+
+latin_idioms = [
+    {
+        "id": "1",
+        "page": 202,
+        "examples": [
+            {
+                "english": "You and I,",
+                "latin": "Ego et tu",
+                "literal_or_explanation": "I and you,",
+                "section_ref": None
+            },
+            {
+                "english": "Balbus and I,",
+                "latin": "Ego et Balbus",
+                "literal_or_explanation": "I and Balbus.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "2",
+        "page": 202,
+        "examples": [
+            {
+                "english": "Says that he has not sinned.",
+                "latin": "negat",
+                "literal_or_explanation": "Denies (negat) that he has sinned.",
+                "section_ref": None
+            },
+            {
+                "english": "Says that he has never, &c.",
+                "latin": "negat",
+                "literal_or_explanation": "Denies that he has ever, &c.",
+                "section_ref": None
+            }
+        ],
+        "notes": "Obs. Says not should not be translated by nego unless it is in answer to an actual or virtual question. When the not is closely connected with the following verb, it should be translated by non."
+    },
+    {
+        "id": "3",
+        "page": 202,
+        "examples": [
+            {
+                "english": "He promises to come.",
+                "latin": None,
+                "literal_or_explanation": "He promises that he will come (acc. with inf.)",
+                "section_ref": None
+            },
+            {
+                "english": "He hopes to live.",
+                "latin": None,
+                "literal_or_explanation": "He hopes that he shall live (acc. with inf.)",
+                "section_ref": None
+            },
+            {
+                "english": "He undertakes to do it.",
+                "latin": None,
+                "literal_or_explanation": "He undertakes that he will do it (acc. with inf.)",
+                "section_ref": None
+            },
+            {
+                "english": "He pretends to be mad (16).",
+                "latin": None,
+                "literal_or_explanation": "He pretends that he is mad (acc. with inf.: pron. expressed).",
+                "section_ref": "16"
+            }
+        ]
+    },
+    {
+        "id": "4",
+        "page": 202,
+        "examples": [
+            {
+                "english": "To have a prosperous voyage.",
+                "latin": "ex sententiâ navigare",
+                "literal_or_explanation": "To sail from (= according to) one's thought or intention (ex sententiâ navigare).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "5",
+        "page": 202,
+        "examples": [
+            {
+                "english": "To my, his, &c. satisfaction : satisfactorily ; successfully.",
+                "latin": "Ex sententiâ",
+                "literal_or_explanation": "Ex sententiâ.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "6",
+        "page": 202,
+        "examples": [
+            {
+                "english": "To fight on horseback.",
+                "latin": "ex equo",
+                "literal_or_explanation": "To fight from (ex) a horse.",
+                "section_ref": None
+            }
+        ],
+        "notes": "Ex equis, if more persons than one are spoken of."
+    },
+    {
+        "id": "6*",
+        "page": 202,
+        "examples": [
+            {
+                "english": "It is a breach of duty.",
+                "latin": "contra officium",
+                "literal_or_explanation": "It is against (contra) duty.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "7",
+        "page": 202,
+        "examples": [
+            {
+                "english": "He sends the most faithful slave he has.",
+                "latin": None,
+                "literal_or_explanation": "He sends the slave, whom he has the most faithful.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "8",
+        "page": 202,
+        "examples": [
+            {
+                "english": "He was the first to do this, / (Or) He was the first who did this.",
+                "latin": None,
+                "literal_or_explanation": "He the first (person) did this (55).",
+                "section_ref": "55"
+            },
+            {
+                "english": "So, He was the only one who did it.",
+                "latin": "solus fecit",
+                "literal_or_explanation": "He alone did it (solus fecit).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "9",
+        "page": 202,
+        "examples": [
+            {
+                "english": "Such is your temperance, / Or, With your usual temperance.",
+                "latin": None,
+                "literal_or_explanation": "Which is your temperance. / Of which temperance you are. / For (= in proportion to) your temperance (56).",
+                "section_ref": "56"
+            }
+        ]
+    },
+    {
+        "id": "10",
+        "page": 203,
+        "examples": [
+            {
+                "english": "As far as I know.",
+                "latin": "quod sciam [printed: quod secum]",
+                "literal_or_explanation": "Which I may know (quod secum [sic, for quod sciam]).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "11",
+        "page": 203,
+        "examples": [
+            {
+                "english": "It's all over with . . .",
+                "latin": "actum est de",
+                "literal_or_explanation": "It is done concerning (actum est de) . .",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "12",
+        "page": 203,
+        "examples": [
+            {
+                "english": "To make the same boast.",
+                "latin": None,
+                "literal_or_explanation": "To boast the same thing (59).",
+                "section_ref": "59"
+            },
+            {
+                "english": "To make the same promise.",
+                "latin": None,
+                "literal_or_explanation": "To promise the same thing (59).",
+                "section_ref": "59"
+            },
+            {
+                "english": "To make many promises.",
+                "latin": None,
+                "literal_or_explanation": "To promise } many things.",
+                "section_ref": None
+            },
+            {
+                "english": "To utter many falsehoods.",
+                "latin": None,
+                "literal_or_explanation": "To lie }",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "13",
+        "page": 203,
+        "examples": [
+            {
+                "english": "To take by storm.",
+                "latin": "per vim expugnare",
+                "literal_or_explanation": "To fight a place out by force (per vim expugnare).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "14",
+        "page": 203,
+        "examples": [
+            {
+                "english": "That nothing . . . [when introducing purpose]",
+                "latin": "ne quid",
+                "literal_or_explanation": "Lest any thing (ne quid).",
+                "section_ref": None
+            },
+            {
+                "english": "That nobody . . . [when introducing purpose]",
+                "latin": "ne quis",
+                "literal_or_explanation": "Lest any body (ne quis).",
+                "section_ref": None
+            },
+            {
+                "english": "That never . . . [when introducing purpose]",
+                "latin": "ne unquam",
+                "literal_or_explanation": "Lest ever (ne unquam).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "15",
+        "page": 203,
+        "examples": [
+            {
+                "english": "No food is so heavy as not to be digested, &c.",
+                "latin": "quin",
+                "literal_or_explanation": "No food is so heavy but (quin) it may be digested, &c.",
+                "section_ref": None
+            },
+            {
+                "english": "He is so foolish as to think, &c.",
+                "latin": "ut",
+                "literal_or_explanation": "So foolish that he thinks (ut), 66, d.",
+                "section_ref": "66, d"
+            }
+        ]
+    },
+    {
+        "id": "16",
+        "page": 203,
+        "examples": [
+            {
+                "english": "She never saw him without calling him, &c.",
+                "latin": "quin",
+                "literal_or_explanation": "She never saw him, but (quin) she called him, &c.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "17",
+        "page": 203,
+        "examples": [
+            {
+                "english": "He could scarcely be restrained from throwing, &c.",
+                "latin": "quin",
+                "literal_or_explanation": "He could scarcely be restrained but that (quin) he should throw (88).",
+                "section_ref": "88"
+            }
+        ]
+    },
+    {
+        "id": "18",
+        "page": 203,
+        "examples": [
+            {
+                "english": "I left nothing undone to appease him.",
+                "latin": "prætermisi ... quin",
+                "literal_or_explanation": "I left undone (prætermisi) nothing that I should not (quin) appease him.",
+                "section_ref": None
+            },
+            {
+                "english": "I cannot but, &c.",
+                "latin": "facere non possum quin",
+                "literal_or_explanation": "I cannot do (any thing) but that (facere non possum quin), &c.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "19",
+        "page": 203,
+        "examples": [
+            {
+                "english": "I will not object to your doing it.",
+                "latin": "recusabo quin",
+                "literal_or_explanation": "I will not object but that (recusabo quin) you should do it.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "20",
+        "page": 203,
+        "examples": [
+            {
+                "english": "It cannot be that the soul is not immortal (89).",
+                "latin": "fieri ... quin",
+                "literal_or_explanation": "It cannot be (fieri) but that (quin) the soul is immortal.",
+                "section_ref": "89"
+            }
+        ]
+    },
+    {
+        "id": "21",
+        "page": 203,
+        "examples": [
+            {
+                "english": "Nothing prevents him from doing it.",
+                "latin": "obstat ... quominus faciat",
+                "literal_or_explanation": "Nothing prevents (obstat) by which he should the less do it (quominus faciat).",
+                "section_ref": None
+            },
+            {
+                "english": "So, nothing deters him from doing it.",
+                "latin": "quominus",
+                "literal_or_explanation": "Nothing deters him by which he should the less do it (99).",
+                "section_ref": "99"
+            }
+        ]
+    },
+    {
+        "id": "22",
+        "page": 203,
+        "examples": [
+            {
+                "english": "It was owing to you that I did not succeed.",
+                "latin": "per te stetit quominus",
+                "literal_or_explanation": "It stood through you by which I should the less succeed (per te stetit quominus, &c., 99).",
+                "section_ref": "99"
+            }
+        ]
+    },
+    {
+        "id": "23",
+        "page": 203,
+        "examples": [
+            {
+                "english": "By sea and land.",
+                "latin": "terrâ marique",
+                "literal_or_explanation": "By land and sea.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "24",
+        "page": 203,
+        "examples": [
+            {
+                "english": "To be within a very little of . . . / Or, But a little more and . . .",
+                "latin": "minimum abesse (impers.) quin",
+                "literal_or_explanation": "To be a very little distant but that . . [minimum abesse (impers.) quin.]",
+                "section_ref": None
+            },
+            {
+                "english": "Not to be far from.",
+                "latin": "Haud multum abesse / Haud procul abesse",
+                "literal_or_explanation": "Haud multum } abesse. / Haud procul }",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "25",
+        "page": 203,
+        "examples": [
+            {
+                "english": "I almost think, / I don't know whether, &c.",
+                "latin": "Haud scio an; nescio an",
+                "literal_or_explanation": "Haud scio an; nescio an, &c.",
+                "section_ref": None
+            }
+        ],
+        "notes": "Haud scio an, nescio an, dubito an may be followed by the negatives, nemo, nihil, nullus, nunquam, or by the forms that follow negatives, quisquam, quicquam, ullus, unquam. Haud scio an nemo approaches nearer to a denial than haud scio an quisquam. (G.)—But Cicero and his contemporaries never omit the negative. (Matthiä, Hand, &c.)"
+    },
+    {
+        "id": "26",
+        "page": 203,
+        "examples": [
+            {
+                "english": "To take away any one's life.",
+                "latin": "vitam alicui eripere",
+                "literal_or_explanation": "To snatch away life to (= from) any one (vitam alicui eripere. 132).",
+                "section_ref": "132"
+            }
+        ]
+    },
+    {
+        "id": "27",
+        "page": 203,
+        "examples": [
+            {
+                "english": "The city of Rome, the island of Cyprus.",
+                "latin": None,
+                "literal_or_explanation": "The city Rome ; the island Cyprus.",
+                "section_ref": None
+            },
+            {
+                "english": "He did this as (or when) Consul.",
+                "latin": None,
+                "literal_or_explanation": "He Consul (= being Consul) did this.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "28",
+        "page": 203,
+        "examples": [
+            {
+                "english": "I may go. / I am permitted to go.",
+                "latin": "licet",
+                "literal_or_explanation": "To me it-is-permitted (licet) to go (124).",
+                "section_ref": "124"
+            },
+            {
+                "english": "I ought to do it.",
+                "latin": "oportet me",
+                "literal_or_explanation": "It behoveth me (oportet me) to do it.",
+                "section_ref": None
+            },
+            {
+                "english": "I ought to have done it.",
+                "latin": "oportuit",
+                "literal_or_explanation": "It behoveth me (oportuit) to do it (126)",
+                "section_ref": "126"
+            }
+        ]
+    },
+    {
+        "id": "29",
+        "page": 204,
+        "examples": [
+            {
+                "english": "I am at leisure to read.",
+                "latin": "vacat",
+                "literal_or_explanation": "There-is-leisure (vacat) to me to read (154).",
+                "section_ref": "154"
+            }
+        ]
+    },
+    {
+        "id": "30",
+        "page": 204,
+        "examples": [
+            {
+                "english": "I have need of food.",
+                "latin": "Opus est",
+                "literal_or_explanation": "(1) There is to me a business with food (prep. omitted). / (2) Food is a business to me.",
+                "section_ref": None
+            },
+            {
+                "english": "There is need of making-haste / deliberation / prompt execution.",
+                "latin": "Opus est",
+                "literal_or_explanation": "There is need of (Opus est) { (the matter) being hastened. / (the matter) being consulted. / (the matter) promptly done (177).",
+                "section_ref": "177"
+            }
+        ]
+    },
+    {
+        "id": "31",
+        "page": 204,
+        "examples": [
+            {
+                "english": "How many are there of you ?",
+                "latin": "quot estis ?",
+                "literal_or_explanation": "How many are ye ? (quot estis ?)",
+                "section_ref": None
+            },
+            {
+                "english": "How many are there of us ?",
+                "latin": "quot sumus ?",
+                "literal_or_explanation": "How many are we ? (quot sumus ?)",
+                "section_ref": None
+            },
+            {
+                "english": "Three hundred of us are come.",
+                "latin": "Trecenti venimus.",
+                "literal_or_explanation": "We (being) three hundred are come. (Trecenti venimus.)",
+                "section_ref": None
+            },
+            {
+                "english": "Of whom there are few / very many.",
+                "latin": None,
+                "literal_or_explanation": "Who are { few. / very many.",
+                "section_ref": None
+            },
+            {
+                "english": "Very many of which . . .",
+                "latin": "quæ plurima",
+                "literal_or_explanation": "Which very many (quæ plurima) . .",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "32",
+        "page": 204,
+        "examples": [
+            {
+                "english": "Some mock, others approve.",
+                "latin": "alii—alii",
+                "literal_or_explanation": "Others mock ; others approve (alii—alii).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "33",
+        "page": 204,
+        "examples": [
+            {
+                "english": "One was a Greek ; the other a Roman.",
+                "latin": "alter—alter",
+                "literal_or_explanation": "The other was a Greek ; the other a Roman (alter—alter).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "34",
+        "page": 204,
+        "examples": [
+            {
+                "english": "Such a lover of truth.",
+                "latin": "adeo",
+                "literal_or_explanation": "So (adeo) loving of, &c.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "35",
+        "page": 204,
+        "examples": [
+            {
+                "english": "To take in good part.",
+                "latin": "Boni consulere / Æqui boni facere / in bonam partem accipere",
+                "literal_or_explanation": "Boni consulere. (See 185.*) [Footnote: Æqui boni facere : in bonam partem accipere.]",
+                "section_ref": "185.*"
+            }
+        ]
+    },
+    {
+        "id": "36",
+        "page": 204,
+        "examples": [
+            {
+                "english": "He was condemned in his absence.",
+                "latin": None,
+                "literal_or_explanation": "He being absent was condemned.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "37",
+        "page": 204,
+        "examples": [
+            {
+                "english": "To prefer a capital charge against Caius.",
+                "latin": "reus",
+                "literal_or_explanation": "To make Caius an accused-person (reus) of a capital matter (187).",
+                "section_ref": "187"
+            },
+            {
+                "english": "To bring an action against a man for bribery.",
+                "latin": "de",
+                "literal_or_explanation": "To make a man an accused-person of bribery (gen.) ; or, about bribery (de).",
+                "section_ref": None
+            },
+            {
+                "english": "To prefer a charge of immorality against Caius.",
+                "latin": "reus ... de moribus",
+                "literal_or_explanation": "To make Caius an accused-person (reus) about morals (de moribus. 187).",
+                "section_ref": "187"
+            },
+            {
+                "english": "To inform a man of a plan.",
+                "latin": "certiorem facere",
+                "literal_or_explanation": "To make a man surer of a plan (certiorem facere).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "38",
+        "page": 204,
+        "examples": [
+            {
+                "english": "Without any danger . . .",
+                "latin": "expers",
+                "literal_or_explanation": "Without (expers, adj.) all danger .",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "39",
+        "page": 204,
+        "examples": [
+            {
+                "english": "It is characteristic of . . . / It is incumbent on . . . / It is for . . .",
+                "latin": None,
+                "literal_or_explanation": "It is (a mark) of . . . / It is (the duty) of . . . / It is (the character, privilege, &c.) of . .",
+                "section_ref": None
+            },
+            {
+                "english": "It demands, or requires, firmness.",
+                "latin": None,
+                "literal_or_explanation": "It is (a thing) of (= for) firmness.",
+                "section_ref": None
+            },
+            {
+                "english": "It shows, or betrays, weakness.",
+                "latin": None,
+                "literal_or_explanation": "It is (a mark) of weakness.",
+                "section_ref": None
+            },
+            {
+                "english": "Any man may do it.",
+                "latin": None,
+                "literal_or_explanation": "It is any man's (task) to do it.",
+                "section_ref": None
+            },
+            {
+                "english": "It is not every man who can &c.",
+                "latin": "non cujusvis est",
+                "literal_or_explanation": "It is not every man's (task) to do it (non cujusvis est), &c.",
+                "section_ref": None
+            },
+            {
+                "english": "It is wise.",
+                "latin": None,
+                "literal_or_explanation": "It is (the conduct) of a wise man. [Words in brackets to be omitted]",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "40",
+        "page": 204,
+        "examples": [
+            {
+                "english": "To reduce to subjection. / To bring under his dominion.",
+                "latin": "suæ ditionis facere",
+                "literal_or_explanation": "To make of his own dominion (suæ ditionis facere).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "41",
+        "page": 204,
+        "examples": [
+            {
+                "english": "To be capitally condemned.",
+                "latin": "capitis condemnari",
+                "literal_or_explanation": "To be condemned of the head.",
+                "section_ref": None
+            },
+            {
+                "english": "To be acquitted of a capital charge.",
+                "latin": "capitis absolvi",
+                "literal_or_explanation": "To be acquitted of the head.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "42",
+        "page": 204,
+        "examples": [
+            {
+                "english": "Common to me and you.",
+                "latin": "communis mihi tecum",
+                "literal_or_explanation": "Common to me with you.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "43",
+        "page": 204,
+        "examples": [
+            {
+                "english": "To compare things together.",
+                "latin": "inter se",
+                "literal_or_explanation": "To compare things amongst (or between) themselves (inter se) 221 (c.).",
+                "section_ref": "221 (c.)"
+            }
+        ]
+    },
+    {
+        "id": "44",
+        "page": 204,
+        "examples": [
+            {
+                "english": "To threaten a man with death.",
+                "latin": "mortem alicui minari",
+                "literal_or_explanation": "To threaten death to a man (222).",
+                "section_ref": "222"
+            }
+        ]
+    },
+    {
+        "id": "45",
+        "page": 204,
+        "examples": [
+            {
+                "english": "To prefer death to slavery.",
+                "latin": "servitutem morti posthabere / anteponere",
+                "literal_or_explanation": "To reckon slavery after death (servitutem morti posthabere, 227). (or, as in Eng., with anteponere).",
+                "section_ref": "227"
+            }
+        ]
+    },
+    {
+        "id": "46",
+        "page": 205,
+        "examples": [
+            {
+                "english": "To surround the city with a wall.",
+                "latin": "circumdăre",
+                "literal_or_explanation": "To give-round (circumdăre) a wall to the city [or as in Eng.].",
+                "section_ref": None
+            },
+            {
+                "english": "To besprinkle a man with praises.",
+                "latin": "aspergere",
+                "literal_or_explanation": "To besprinkle (aspergere) praises to man [or as in Eng.].",
+                "section_ref": None
+            },
+            {
+                "english": "To put on a garment.",
+                "latin": "induere",
+                "literal_or_explanation": "To clothe (induere) myself with a garment ; or to put-on (induere) a garment to myself.",
+                "section_ref": None
+            },
+            {
+                "english": "To take the enemy's camp, baggage, &c.",
+                "latin": "exuere",
+                "literal_or_explanation": "To strip (exuere) the enemy of their camp, baggage, &c. (abl.) 233.",
+                "section_ref": "233"
+            },
+            {
+                "english": "To obstruct (or cut off) the enemy's flight.",
+                "latin": "intercludere",
+                "literal_or_explanation": "To shut-up (intercludere) flight to the enemy (233).",
+                "section_ref": "233"
+            },
+            {
+                "english": "To cut off the supplies of the Gauls.",
+                "latin": "intercludere ... commeatu",
+                "literal_or_explanation": "To shut-up (intercludere) the Gauls from their supplies (abl. commeatu). 233.",
+                "section_ref": "233"
+            }
+        ]
+    },
+    {
+        "id": "47",
+        "page": 205,
+        "examples": [
+            {
+                "english": "I have a book.",
+                "latin": "Est mihi liber",
+                "literal_or_explanation": "There is a book to me.",
+                "section_ref": None
+            },
+            {
+                "english": "I have two books.",
+                "latin": "Sunt mihi duo libri",
+                "literal_or_explanation": "There are two books to me (238).",
+                "section_ref": "238"
+            }
+        ]
+    },
+    {
+        "id": "48",
+        "page": 205,
+        "examples": [
+            {
+                "english": "To come / send / set out to the assistance of Cæsar.",
+                "latin": "Auxilio venire, mittere, proficisci",
+                "literal_or_explanation": "To come / send / set out to Cæsar for an assistance (dat.). (Auxilio venire, mittere, proficisci.)",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "49",
+        "page": 205,
+        "examples": [
+            {
+                "english": "To give as a present.",
+                "latin": "dono dare",
+                "literal_or_explanation": "To give for a present (dono dare).",
+                "section_ref": None
+            },
+            {
+                "english": "To impute as a fault.",
+                "latin": "Culpæ, or vitio dare, or vertere",
+                "literal_or_explanation": "To give it } for a fault (dat.). / To turn it } (Culpæ, or vitio dare, or vertere.)",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "50",
+        "page": 205,
+        "examples": [
+            {
+                "english": "To be a reproach, or disgraceful.",
+                "latin": "opprobrio esse",
+                "literal_or_explanation": "To be for a reproach (opprobrio esse)",
+                "section_ref": None
+            },
+            {
+                "english": "To be very advantageous.",
+                "latin": "magnæ utilitati esse",
+                "literal_or_explanation": "To be for a great advantage (magnæ utilitati esse).",
+                "section_ref": None
+            },
+            {
+                "english": "To be odious ; hateful.",
+                "latin": "odio esse",
+                "literal_or_explanation": "To be for a hatred (odio esse). (So impedimento, honori, &c., esse.)",
+                "section_ref": None
+            },
+            {
+                "english": "How odious it is !",
+                "latin": "Quanto odio est !",
+                "literal_or_explanation": "Quanto odio est ! (how odious it is !)",
+                "section_ref": None
+            }
+        ],
+        "notes": "Obs. 'How' before the adj. must be 'quantus' in agreement with subst."
+    },
+    {
+        "id": "51",
+        "page": 205,
+        "examples": [
+            {
+                "english": "[To throw himself at Cæsar's feet.]",
+                "latin": "Se Cæsari ad pedes projicere",
+                "literal_or_explanation": "[Se Cæsari ad pedes projicere ; or literally.] See p. 89, note l.",
+                "section_ref": "p. 89, note l"
+            }
+        ]
+    },
+    {
+        "id": "52",
+        "page": 205,
+        "examples": [
+            {
+                "english": "Caius would say . . . / Caius used to say . . .",
+                "latin": "Dicebat",
+                "literal_or_explanation": "Dicebat.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "53",
+        "page": 205,
+        "examples": [
+            {
+                "english": "I fear that he will come.",
+                "latin": "ne veniat",
+                "literal_or_explanation": "I fear lest he come (ne veniat).",
+                "section_ref": None
+            },
+            {
+                "english": "I fear that he will not come.",
+                "latin": "ut veniat / ne non veniat",
+                "literal_or_explanation": "I fear that he come (ut veniat [or, ne non veniat]).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "54",
+        "page": 205,
+        "examples": [
+            {
+                "english": "The war against Pyrrhus. / Connection with Pompey. / Rest from labours. / Wrongs done to Caius.",
+                "latin": "Genitive",
+                "literal_or_explanation": "The war of Pyrrhus } / Connection of Pompey } / Rest of labours } Genitive. / Wrongs of Caius }",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "55",
+        "page": 205,
+        "examples": [
+            {
+                "english": "He did it that he might the more easily escape.",
+                "latin": "quo",
+                "literal_or_explanation": "He did this, by which (quo) he might more easily escape.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "56",
+        "page": 205,
+        "examples": [
+            {
+                "english": "To make Cæsar retire.",
+                "latin": "facere, or efficere ut",
+                "literal_or_explanation": "To make that Cæsar should retire (facere, or efficere ut, &c.).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "57",
+        "page": 205,
+        "examples": [
+            {
+                "english": "It is becoming to (or in) an orator to be angry, &c.",
+                "latin": "oratorem decet",
+                "literal_or_explanation": "It becomes an orator to be angry, &c. (oratorem decet).",
+                "section_ref": None
+            },
+            {
+                "english": "So, it is unbecoming to (or in) an orator . . .",
+                "latin": "Oratorem dedecet",
+                "literal_or_explanation": "(Oratorem dedecet . . .) 259.",
+                "section_ref": "259"
+            }
+        ]
+    },
+    {
+        "id": "58",
+        "page": 205,
+        "examples": [
+            {
+                "english": "This victory cost them many wounds.",
+                "latin": "stetit",
+                "literal_or_explanation": "This victory stood to them at many wounds (abl.). 266. [Compare the Eng. 'this stood me in a large sum.']",
+                "section_ref": "266"
+            }
+        ],
+        "notes": "This notion is probably that of a debt standing against a man in his creditor's books."
+    },
+    {
+        "id": "59",
+        "page": 205,
+        "examples": [
+            {
+                "english": "Hardly any body.",
+                "latin": "nemo fere",
+                "literal_or_explanation": "Almost nobody (nemo fere) 249.",
+                "section_ref": "249"
+            }
+        ]
+    },
+    {
+        "id": "60",
+        "page": 206,
+        "examples": [
+            {
+                "english": "Make a bad, &c. use of, &c.",
+                "latin": "male uti",
+                "literal_or_explanation": "Use badly (273).",
+                "section_ref": "273"
+            }
+        ]
+    },
+    {
+        "id": "61",
+        "page": 206,
+        "examples": [
+            {
+                "english": "He deserves to be loved.",
+                "latin": "dignus est qui ametur",
+                "literal_or_explanation": "He is a deserving person, who should be loved (dignus est qui ametur). 276.",
+                "section_ref": "276"
+            }
+        ]
+    },
+    {
+        "id": "62",
+        "page": 206,
+        "examples": [
+            {
+                "english": "To inflict punishment on a man.",
+                "latin": "aliquem pœnâ afficere",
+                "literal_or_explanation": "To affect a man with punishment (276) (aliquem pœnâ afficere).",
+                "section_ref": "276"
+            }
+        ]
+    },
+    {
+        "id": "63",
+        "page": 206,
+        "examples": [
+            {
+                "english": "To gain a triumph for a victory over the Gauls.",
+                "latin": "triumphare de",
+                "literal_or_explanation": "To triumph concerning (de) the Gauls.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "64",
+        "page": 206,
+        "examples": [
+            {
+                "english": "A blessing on / Good luck, or success to your valour. / Go on in your valour !",
+                "latin": "macte virtute esto / macti este",
+                "literal_or_explanation": "Be thou increased in valour (macte virtute esto : voc. for nom. 280). (Plur. macti este !)",
+                "section_ref": "280"
+            }
+        ]
+    },
+    {
+        "id": "65",
+        "page": 206,
+        "examples": [
+            {
+                "english": "You are envied, spared, favoured, answered, &c.",
+                "latin": "invidētur tibi, &c.",
+                "literal_or_explanation": "It is envied (spared, favoured, answered, &c.) to you (290).",
+                "section_ref": "290"
+            }
+        ]
+    },
+    {
+        "id": "66",
+        "page": 206,
+        "examples": [
+            {
+                "english": "I don't know when the letter will be written.",
+                "latin": "quando futurum sit ut",
+                "literal_or_explanation": "I don't know when it will be (quando futurum sit) that (ut) the letter be written (290).",
+                "section_ref": "290"
+            }
+        ]
+    },
+    {
+        "id": "67",
+        "page": 206,
+        "examples": [
+            {
+                "english": "It seems, is said, &c. that Caius has retired.",
+                "latin": "Caius videtur / dicitur",
+                "literal_or_explanation": "Caius seems, is said, &c. to have retired (nearly always).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "68",
+        "page": 206,
+        "examples": [
+            {
+                "english": "We have walked, come, &c.",
+                "latin": "ambulatum, ventum est",
+                "literal_or_explanation": "It has been walked, come, &c. (that is, by us : ambulatum, ventum est). [This is only an occasional and possible construction.]",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "69",
+        "page": 206,
+        "examples": [
+            {
+                "english": "To have reigned above six years.",
+                "latin": "septimum annum regnare",
+                "literal_or_explanation": "To be reigning his seventh year.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "70",
+        "page": 206,
+        "examples": [
+            {
+                "english": "Before the Consulship of Caius.",
+                "latin": "ante Caium consulem",
+                "literal_or_explanation": "Before Caius Consul (ante Caium consulem).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "71",
+        "page": 206,
+        "examples": [
+            {
+                "english": "He went to a school at Naples.",
+                "latin": "Neapolim in ludum",
+                "literal_or_explanation": "He went to Naples to (prep.) a school.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "72",
+        "page": 206,
+        "examples": [
+            {
+                "english": "We should all praise virtue.",
+                "latin": "Virtus omnibus laudanda est",
+                "literal_or_explanation": "Virtue is to-be-praised by all (laudanda).",
+                "section_ref": None
+            },
+            {
+                "english": "A time to play.",
+                "latin": "tempus ludendi",
+                "literal_or_explanation": "A time of playing.",
+                "section_ref": None
+            },
+            {
+                "english": "Fit to carry burdens.",
+                "latin": "oneribus gestandis idoneus",
+                "literal_or_explanation": "Fit for burdens to be carried (oneribus gestandis idoneus).",
+                "section_ref": None
+            },
+            {
+                "english": "He is born (or inclined) to act.",
+                "latin": "ad agendum",
+                "literal_or_explanation": "He is born (or inclined) for acting (ad agendum).",
+                "section_ref": None
+            },
+            {
+                "english": "Prepared to take up arms.",
+                "latin": "ad arma capienda",
+                "literal_or_explanation": "Prepared for (ad) arms-to-be-taken-up.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "73",
+        "page": 206,
+        "examples": [
+            {
+                "english": "Whilst they are drinking, playing, &c.",
+                "latin": "inter bibendum, ludendum, &c.",
+                "literal_or_explanation": "During drinking, playing, &c. (inter bibendum, ludendum, &c.)",
+                "section_ref": None
+            },
+            {
+                "english": "To be able to pay.",
+                "latin": "solvendo esse",
+                "literal_or_explanation": "To be for paying (solvendo esse).",
+                "section_ref": None
+            },
+            {
+                "english": "To be equal to bearing the burden.",
+                "latin": "oneri ferendo esse",
+                "literal_or_explanation": "To be for bearing the burden (oneri ferendo esse).",
+                "section_ref": None
+            },
+            {
+                "english": "To tend to the preservation of liberty.",
+                "latin": "conservandæ libertatis esse",
+                "literal_or_explanation": "To be of liberty to-be-preserved (conservandæ libertatis esse).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "74",
+        "page": 206,
+        "examples": [
+            {
+                "english": "I have to do another page.",
+                "latin": "alia pagina facienda est",
+                "literal_or_explanation": "Another page is to-be-done.",
+                "section_ref": None
+            },
+            {
+                "english": "I will have it done.",
+                "latin": "curabo faciendum",
+                "literal_or_explanation": "I will cause it-to-be-done (curabo faciendum).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "75",
+        "page": 206,
+        "examples": [
+            {
+                "english": "He gave them the country to dwell in.",
+                "latin": "habitandam",
+                "literal_or_explanation": "He gave them the country to be dwelt in (habitandam). 354.",
+                "section_ref": "354"
+            }
+        ]
+    },
+    {
+        "id": "76",
+        "page": 206,
+        "examples": [
+            {
+                "english": "I go to consult Apollo.",
+                "latin": "consulturus",
+                "literal_or_explanation": "I go intending-to-consult (consulturus) Apollo (354).",
+                "section_ref": "354"
+            }
+        ]
+    },
+    {
+        "id": "77",
+        "page": 206,
+        "examples": [
+            {
+                "english": "Balbus having left Lavinium, &c.",
+                "latin": "Relicto Lavinio / quum reliquisset Lavinium",
+                "literal_or_explanation": "Balbus, Lavinium being left, &c. / Balbus, when he had left Lavinium, &c. (Relicto Lavinio ; or quum reliquisset Lavinium : 363, a.)",
+                "section_ref": "363, a"
+            }
+        ]
+    },
+    {
+        "id": "78",
+        "page": 206,
+        "examples": [
+            {
+                "english": "From the foundation of Rome.",
+                "latin": "a Româ conditâ",
+                "literal_or_explanation": "From Rome founded (a Româ conditâ).",
+                "section_ref": None
+            },
+            {
+                "english": "From the destruction of Jerusalem.",
+                "latin": "ab Hierosolymis deletis",
+                "literal_or_explanation": "From Jerusalem destroyed (363).",
+                "section_ref": "363"
+            },
+            {
+                "english": "The honour of having saved the king (of the king's preservation).",
+                "latin": "servati regis decus",
+                "literal_or_explanation": "The honour of the saved king (servati regis decus).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "79",
+        "page": "206-207",
+        "examples": [
+            {
+                "english": "He does it without robbing others.",
+                "latin": None,
+                "literal_or_explanation": "He does it, not robbing others.",
+                "section_ref": None
+            },
+            {
+                "english": "He goes away without your perceiving it.",
+                "latin": "te non sentiente",
+                "literal_or_explanation": "He goes away, you not perceiving it (te non sentiente).",
+                "section_ref": None
+            },
+            {
+                "english": "They condemn him without hearing him.",
+                "latin": "inauditum",
+                "literal_or_explanation": "They condemn him unheard (inauditum).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "80",
+        "page": 207,
+        "examples": [
+            {
+                "english": "I have completed the work.",
+                "latin": "opus absolutum habeo",
+                "literal_or_explanation": "I have the work completed (opus absolutum habeo). 364.",
+                "section_ref": "364"
+            },
+            {
+                "english": "I see plainly through his design.",
+                "latin": "perspectum habeo",
+                "literal_or_explanation": "I have his design seen through (perspectum habeo). 364.",
+                "section_ref": "364"
+            }
+        ]
+    },
+    {
+        "id": "81",
+        "page": 207,
+        "examples": [
+            {
+                "english": "I heard him sing.",
+                "latin": "canentem",
+                "literal_or_explanation": "I heard him singing.",
+                "section_ref": None
+            },
+            {
+                "english": "I saw him walk.",
+                "latin": "ambulantem",
+                "literal_or_explanation": "I saw him walking (361).",
+                "section_ref": "361"
+            }
+        ]
+    },
+    {
+        "id": "82",
+        "page": 207,
+        "examples": [
+            {
+                "english": "That only.",
+                "latin": "is demum",
+                "literal_or_explanation": "That at length (is demum).",
+                "section_ref": None
+            },
+            {
+                "english": "And that too.",
+                "latin": "Et is, isque, idemque",
+                "literal_or_explanation": "Et is, isque, idemque.",
+                "section_ref": None
+            },
+            {
+                "english": "By a good man it is true, but an unlearned one.",
+                "latin": "a bono illo quidem viro, sed— / sed tamen",
+                "literal_or_explanation": "By a good man that indeed, but an unlearned one (a bono illo quidem viro, sed—, or sed tamen, 383).",
+                "section_ref": "383"
+            },
+            {
+                "english": "Literature, and that too of no common kind.",
+                "latin": "nec eæ vulgares",
+                "literal_or_explanation": "Literature, nor that of-a-common-kind (nec eæ vulgares).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "83",
+        "page": 207,
+        "examples": [
+            {
+                "english": "A slave of mine.",
+                "latin": "quidam ex",
+                "literal_or_explanation": "'My slave ;' or 'a certain one out of (quidam ex) my slaves.'",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "84",
+        "page": 207,
+        "examples": [
+            {
+                "english": "He took away all my care.",
+                "latin": "mihi",
+                "literal_or_explanation": "He took away from me (mihi) all care",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "85",
+        "page": 207,
+        "examples": [
+            {
+                "english": "That famous Medea.",
+                "latin": "Medea illa",
+                "literal_or_explanation": "That Medea (Medea illa).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "86",
+        "page": 207,
+        "examples": [
+            {
+                "english": "Those whom we love we also wish happy.",
+                "latin": "eosdem",
+                "literal_or_explanation": "Those whom we love, the same (eosdem) we wish happy.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "87",
+        "page": 207,
+        "examples": [
+            {
+                "english": "Something or other obscure.",
+                "latin": "nescio quid obscuri",
+                "literal_or_explanation": "I know not what of obscure (nescio quid obscuri).",
+                "section_ref": None
+            },
+            {
+                "english": "Some chance or other.",
+                "latin": "nescio quis casus",
+                "literal_or_explanation": "I know not what chance (nescio quis casus).",
+                "section_ref": None
+            },
+            {
+                "english": "Somewhat disturbed.",
+                "latin": "nescio quid conturbatus",
+                "literal_or_explanation": "Disturbed I know not what (nescio quid conturbatus).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "88",
+        "page": 207,
+        "examples": [
+            {
+                "english": "Henry, Charles, and John.",
+                "latin": None,
+                "literal_or_explanation": "{ Henry, Charles, John. / { Henry, and Charles, and John.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "89",
+        "page": 207,
+        "examples": [
+            {
+                "english": "Every opinion that, &c.",
+                "latin": "quæcunque opinio",
+                "literal_or_explanation": "Whatever opinion (quæcunque opinio).",
+                "section_ref": None
+            },
+            {
+                "english": "Every man who.",
+                "latin": "quisquis",
+                "literal_or_explanation": "Whoever (quisquis). (More commonly than in English, as we seldom use whoever, when the notion of every is emphatic).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "90",
+        "page": 207,
+        "examples": [
+            {
+                "english": "One Balbus.",
+                "latin": "quidam Balbus",
+                "literal_or_explanation": "A certain (quidam) Balbus.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "91",
+        "page": 207,
+        "examples": [
+            {
+                "english": "One runs one way, another another. / Different men run different ways. / Some run one way, others another.",
+                "latin": "alius—alius",
+                "literal_or_explanation": "Another man runs another way. / Other men run another way (or other ways). [alius—alius (or some adv. derived from alius)].",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "92",
+        "page": 207,
+        "examples": [
+            {
+                "english": "The best men always, &c.",
+                "latin": "optimus quisque",
+                "literal_or_explanation": "Each best man, &c. (optimus quisque).",
+                "section_ref": None
+            },
+            {
+                "english": "Hidden snares are always, &c.",
+                "latin": "occultissimæ quæque insidiæ",
+                "literal_or_explanation": "Each hidden snare, &c. (but quisque may be used in the plur. when a subs. is expressed in this construction : occultissimæ quæque insidiæ).",
+                "section_ref": None
+            },
+            {
+                "english": "All the wisest men.",
+                "latin": "doctissimus quisque",
+                "literal_or_explanation": "Each wisest man (doctissimus quisque).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "93",
+        "page": 207,
+        "examples": [
+            {
+                "english": "These are hard to avoid. / There is difficulty in avoiding these.",
+                "latin": "difficile / difficilius / difficillime",
+                "literal_or_explanation": "These are avoided with difficulty (difficile). (Difficilius, difficillime, when required.)",
+                "section_ref": None
+            },
+            {
+                "english": "He has the greatest difficulty in suspecting.",
+                "latin": "difficillime",
+                "literal_or_explanation": "He suspects with the greatest difficulty (difficillime).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "94",
+        "page": 207,
+        "examples": [
+            {
+                "english": "He is too proud to steal.",
+                "latin": "quam ut / quam qui",
+                "literal_or_explanation": "He is prouder than that he (quam ut or quam qui with subj.) should steal.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "95",
+        "page": 207,
+        "examples": [
+            {
+                "english": "I armed the greatest forces I could.",
+                "latin": "quam maximas potui copias",
+                "literal_or_explanation": "I armed forces (as great) as the greatest I could (quam maximas potui copias).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "96",
+        "page": 208,
+        "examples": [
+            {
+                "english": "As great a difference as there can possibly be. / The greatest possible difference.",
+                "latin": "quanta maxima potest esse",
+                "literal_or_explanation": "A difference as-great-as the greatest can be (quanta maxima potest esse).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "97",
+        "page": 208,
+        "examples": [
+            {
+                "english": "I have been long desiring.",
+                "latin": "jam pridem cupio",
+                "literal_or_explanation": "I am a long time already desiring (jam pridem cupio).",
+                "section_ref": None
+            },
+            {
+                "english": "They had long been preparing.",
+                "latin": "jam pridem parabant",
+                "literal_or_explanation": "They were a long time already preparing (413).",
+                "section_ref": "413"
+            }
+        ]
+    },
+    {
+        "id": "98",
+        "page": 208,
+        "examples": [
+            {
+                "english": "When I take my journey, I will come.",
+                "latin": None,
+                "literal_or_explanation": "When I shall take my journey, I will come.",
+                "section_ref": None
+            },
+            {
+                "english": "When I have performed this, I will come.",
+                "latin": None,
+                "literal_or_explanation": "When I shall have performed this, I will come.",
+                "section_ref": None
+            },
+            {
+                "english": "When he is come, he will tell us.",
+                "latin": None,
+                "literal_or_explanation": "When he shall have come, he will tell us.",
+                "section_ref": None
+            },
+            {
+                "english": "When you wish to play, remember to play fair.",
+                "latin": None,
+                "literal_or_explanation": "When you shall wish to play, remember to play fair.",
+                "section_ref": None
+            },
+            {
+                "english": "As you sow, so will you reap.",
+                "latin": None,
+                "literal_or_explanation": "As you shall sow, so will you reap.",
+                "section_ref": None
+            },
+            {
+                "english": "I will do it, if I can.",
+                "latin": None,
+                "literal_or_explanation": "I will do it, if I shall be able.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "99",
+        "page": 208,
+        "examples": [
+            {
+                "english": "They do nothing but laugh.",
+                "latin": "nihil aliud quam rident",
+                "literal_or_explanation": "They nothing else than laugh (nihil aliud quam rident).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "100",
+        "page": 208,
+        "examples": [
+            {
+                "english": "What shall I do ? / What am I to do ? / What can I do ?",
+                "latin": "Quid faciam ?",
+                "literal_or_explanation": "Quid faciam ?",
+                "section_ref": None
+            },
+            {
+                "english": "Why should I relate ?",
+                "latin": "Cur hæc narrem ?",
+                "literal_or_explanation": "Cur hæc narrem ?",
+                "section_ref": None
+            },
+            {
+                "english": "What was I to do ? / What should I have done ? / What ought I to have done ?",
+                "latin": "Quid facerem ?",
+                "literal_or_explanation": "Quid facerem ? (425.)",
+                "section_ref": "425"
+            }
+        ]
+    },
+    {
+        "id": "101",
+        "page": 208,
+        "examples": [
+            {
+                "english": "You would have thought.",
+                "latin": "Putares.",
+                "literal_or_explanation": "Putares.",
+                "section_ref": None
+            },
+            {
+                "english": "You would have believed.",
+                "latin": "Crederes.",
+                "literal_or_explanation": "Crederes.",
+                "section_ref": None
+            },
+            {
+                "english": "You would have said.",
+                "latin": "Diceres.",
+                "literal_or_explanation": "Diceres.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "102",
+        "page": 208,
+        "examples": [
+            {
+                "english": "I remember to have read.",
+                "latin": "Memini me legere.",
+                "literal_or_explanation": "Memini me legere.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "103",
+        "page": 208,
+        "examples": [
+            {
+                "english": "It would have been better.",
+                "latin": "utilius or satius fuit",
+                "literal_or_explanation": "It was better (utilius or satius fuit).",
+                "section_ref": None
+            }
+        ],
+        "notes": "So, satis, par, rectum, justum, idoneum, optimum, consentaneum, melius, æquius, rectius, satius erat—fuit—fuerat."
+    },
+    {
+        "id": "104",
+        "page": 208,
+        "examples": [
+            {
+                "english": "No painter.",
+                "latin": "nemo pictor",
+                "literal_or_explanation": "(Often) nemo pictor.",
+                "section_ref": None
+            },
+            {
+                "english": "This does not at all terrify me.",
+                "latin": "nihil me terret",
+                "literal_or_explanation": "This terrifies me nothing (nihil me terret).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "105",
+        "page": 208,
+        "examples": [
+            {
+                "english": "Even this is not just, unless it be voluntary.",
+                "latin": "ita justum . . . . si est",
+                "literal_or_explanation": "Even this is so just, if it is voluntary (ita justum . . . . si est, &c.).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "106",
+        "page": 208,
+        "examples": [
+            {
+                "english": "He was more prudent than brave.",
+                "latin": "prudentior quam fortior",
+                "literal_or_explanation": "He was more prudent than braver (prudentior quam fortior). 452, w.",
+                "section_ref": "452, w"
+            }
+        ]
+    },
+    {
+        "id": "107",
+        "page": 208,
+        "examples": [
+            {
+                "english": "To make a bridge over a river.",
+                "latin": "pontem in flumine facere",
+                "literal_or_explanation": "To make a bridge in a river.",
+                "section_ref": None
+            },
+            {
+                "english": "The thing in question.",
+                "latin": "res de qua agitur",
+                "literal_or_explanation": "The thing de quo agitur.",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "108",
+        "page": 208,
+        "examples": [
+            {
+                "english": "I have nothing to accuse old age of.",
+                "latin": "nihil habeo quod incusem senectutem",
+                "literal_or_explanation": "I have nothing which I may accuse old age (nihil habeo quod incusem senectutem). 478.",
+                "section_ref": "478"
+            },
+            {
+                "english": "I have found scarcely any thing to censure.",
+                "latin": None,
+                "literal_or_explanation": "I have found scarcely any thing, which I may censure.",
+                "section_ref": None
+            },
+            {
+                "english": "Men who abound in silver, in gold, in estates.",
+                "latin": None,
+                "literal_or_explanation": "Men who abound in silver, who in gold, who in estates.",
+                "section_ref": None
+            },
+            {
+                "english": "Men who abound neither in silver, nor in gold, nor in estates.",
+                "latin": None,
+                "literal_or_explanation": "Men who do not abound in silver, not in gold, not in estates (478).",
+                "section_ref": "478"
+            },
+            {
+                "english": "A pen to write with.",
+                "latin": None,
+                "literal_or_explanation": "A pen, with which one may write (478).",
+                "section_ref": "478"
+            }
+        ]
+    },
+    {
+        "id": "109",
+        "page": "208-209",
+        "category": "Constructions with the relative",
+        "examples": [
+            {
+                "english": "(1) Some persons think : or there are some who think, &c.",
+                "latin": "Sunt qui putent",
+                "literal_or_explanation": "There are some who think (subj. Sunt qui putent, &c.).",
+                "section_ref": None
+            },
+            {
+                "english": "(2) You have no reason (cause, occasion, need, &c.) to hurry.",
+                "latin": "nihil est quod festines / non est quod",
+                "literal_or_explanation": "There is nothing (on account of) which you should hurry (nihil est quod festines). (or) There is not (any thing, for) which you should hurry (non est quod, &c.)",
+                "section_ref": None
+            },
+            {
+                "english": "(3) He was despised by them, for they saw through him.",
+                "latin": "qui with subj.",
+                "literal_or_explanation": "He was despised by them, who saw through him (qui with subj.).",
+                "section_ref": None
+            },
+            {
+                "english": "(4) He deserves to be loved.",
+                "latin": "Dignus est, qui ametur / quem ames",
+                "literal_or_explanation": "He is a worthy person who should be loved. (Dignus est, qui ametur ; or quem ames. So, indignus est, qui ametur : or, quem ames.)",
+                "section_ref": None
+            },
+            {
+                "english": "(5) He is not a proper person to be received.",
+                "latin": None,
+                "literal_or_explanation": "He is not a proper person who should be received (or, whom you should receive).",
+                "section_ref": None
+            },
+            {
+                "english": "(6) None are so good as never to sin.",
+                "latin": "subj.",
+                "literal_or_explanation": "No one is so good who never sins (subj.).",
+                "section_ref": None
+            },
+            {
+                "english": "(7) Of such a kind that we can neglect duties for their sake.",
+                "latin": None,
+                "literal_or_explanation": "Of such a kind for the sake of which we can neglect duties.",
+                "section_ref": None
+            },
+            {
+                "english": "(8) Too short to be the whole life of man.",
+                "latin": "quam quæ sit or possit esse",
+                "literal_or_explanation": "Shorter than which can be (quam quæ sit or possit esse) the whole life of man.",
+                "section_ref": None
+            },
+            {
+                "english": "(9) I am not a man (or, am not so foolish, simple, credulous, &c.) as to believe this.",
+                "latin": "is qui credam",
+                "literal_or_explanation": "I am not that (person) who can believe (is qui credam).",
+                "section_ref": None
+            },
+            {
+                "english": "(10) Who am I that my writings should be honoured thus ?",
+                "latin": None,
+                "literal_or_explanation": "Who am I whose writings should be honoured thus ?",
+                "section_ref": None
+            },
+            {
+                "english": "(11) They sent ambassadors to sue for peace.",
+                "latin": "qui pacem peterent",
+                "literal_or_explanation": "They sent ambassadors who should sue for peace (qui pacem peterent).",
+                "section_ref": None
+            },
+            {
+                "english": "(12) He deserves praise (blame, &c.) for having done this.",
+                "latin": "subj.",
+                "literal_or_explanation": "He deserves praise, &c. who did this (subj.).",
+                "section_ref": None
+            },
+            {
+                "english": "(13) Wretched man that I am, who thought, &c.",
+                "latin": "qui with subj.",
+                "literal_or_explanation": "O me miserable, who thought, &c. (qui with subj.)",
+                "section_ref": None
+            },
+            {
+                "english": "(14) How few there are who, &c.",
+                "latin": "Quotusquisque est qui",
+                "literal_or_explanation": "Quotusquisque est qui . . ? (with subj.)",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "110",
+        "page": 209,
+        "examples": [
+            {
+                "english": "In censuring them you censure me.",
+                "latin": "quum with indic.",
+                "literal_or_explanation": "When you censure them, you censure me (quum with indic.).",
+                "section_ref": None
+            }
+        ]
+    },
+    {
+        "id": "111",
+        "page": 209,
+        "examples": [
+            {
+                "english": "It is many years since he was first in my debt.",
+                "latin": "quum in meo ære est",
+                "literal_or_explanation": "There are many years when he is in my debt (quum in meo ære est).",
+                "section_ref": None
+            },
+            {
+                "english": "I congratulate you on your influence with Caius.",
+                "latin": "quum / quod, tantum vales apud Caium",
+                "literal_or_explanation": "I congratulate you, when you avail so much with Caius (quum, generally quod, tantum vales apud Caium).",
+                "section_ref": None
+            },
+            {
+                "english": "I don't like to be abused.",
+                "latin": "libenter",
+                "literal_or_explanation": "I am not abused willingly (libenter, 491).",
+                "section_ref": "491"
+            }
+        ]
+    },
+    {
+        "id": "112",
+        "page": 209,
+        "examples": [
+            {
+                "english": "A mortal body must necessarily perish.",
+                "latin": "Mortale corpus interire (or intereat) necesse est",
+                "literal_or_explanation": "It is necessary that a mortal body should perish. [Mortale corpus interire (or intereat) necesse est.]",
+                "section_ref": None
+            },
+            {
+                "english": "There is no living pleasantly.",
+                "latin": "non potest suaviter vivi",
+                "literal_or_explanation": "It cannot be lived pleasantly (504).",
+                "section_ref": "504"
+            }
+        ],
+        "notes": "This necesse is an old adj. used in the neut. gender only."
+    },
+    {
+        "id": "113",
+        "page": 209,
+        "examples": [
+            {
+                "english": "In addition to this, he is blind.",
+                "latin": "huc acced-it, ebat, &c. ut / quod",
+                "literal_or_explanation": "Hither is added, that he is blind (huc acced-it, ebat, &c. ut). 513. [Footnote: More commonly quod.]",
+                "section_ref": "513"
+            }
+        ]
+    },
+    {
+        "id": "114",
+        "page": 209,
+        "examples": [
+            {
+                "english": "He accused him of having betrayed the king.",
+                "latin": "quod",
+                "literal_or_explanation": "He accused him that (quod) he had betrayed the king (subj.).",
+                "section_ref": None
+            },
+            {
+                "english": "His having spared the conquered, is a great thing.",
+                "latin": "quod",
+                "literal_or_explanation": "It (or 'this,' 'that') is a great thing, that (quod) he spared the conquered (indic.).",
+                "section_ref": None
+            },
+            {
+                "english": "He praised (or blamed him) for having done this.",
+                "latin": "quod",
+                "literal_or_explanation": "He praised (or blamed) him that (quod) he had done this (subj.). 520.",
+                "section_ref": "520"
+            }
+        ]
+    },
+    {
+        "id": "115",
+        "page": 209,
+        "examples": [
+            {
+                "english": "Many persons admire poems without understanding them.",
+                "latin": "nec intelligunt",
+                "literal_or_explanation": "Many persons admire poems, nor understand them (520).",
+                "section_ref": "520"
+            },
+            {
+                "english": "You cannot be ruined without ruining others.",
+                "latin": "ut non with subj.",
+                "literal_or_explanation": "You cannot be ruined so as not to ruin others (ut non with subj.). 521.",
+                "section_ref": "521"
+            }
+        ]
+    },
+    {
+        "id": "116",
+        "page": "209-210",
+        "examples": [
+            {
+                "english": "Instead of reading, he is at play.",
+                "latin": "quum debeat",
+                "literal_or_explanation": "He is at play, whereas he ought to be reading (quum debeat).",
+                "section_ref": None
+            },
+            {
+                "english": "Instead of growing rich (as he might) he is growing poor.",
+                "latin": "quum posset",
+                "literal_or_explanation": "He is growing poor, whereas he might grow rich (quum posset).",
+                "section_ref": None
+            },
+            {
+                "english": "Far from thinking this, I hold, &c.",
+                "latin": "Tantum abest ut—ut",
+                "literal_or_explanation": "It is so far off, that I should think this that, &c. (Tantum abest ut—ut). 533.",
+                "section_ref": "533"
+            }
+        ]
+    },
+    {
+        "id": "117",
+        "page": 210,
+        "examples": [
+            {
+                "english": "And (but, &c.) if this is granted.",
+                "latin": "Quod si",
+                "literal_or_explanation": "If which is granted.",
+                "section_ref": None
+            },
+            {
+                "english": "Who, they say, was killed.",
+                "latin": "Quem ferunt",
+                "literal_or_explanation": "Whom they report to have been killed.",
+                "section_ref": None
+            },
+            {
+                "english": "Who, as B. says, was killed.",
+                "latin": None,
+                "literal_or_explanation": "Whom B. reports to have been killed.",
+                "section_ref": None
+            },
+            {
+                "english": "By which, when we read them, we are affected.",
+                "latin": "Quibus lectis",
+                "literal_or_explanation": "Which when we read, we are affected.",
+                "section_ref": None
+            },
+            {
+                "english": "Do not think.",
+                "latin": "cave putes / noli putare",
+                "literal_or_explanation": "Beware of thinking, cave putes. / Be unwilling to think, noli putare.",
+                "section_ref": None
+            },
+            {
+                "english": "Take care to do it.",
+                "latin": "Cura ut facias",
+                "literal_or_explanation": "Cura ut facias.",
+                "section_ref": None
+            },
+            {
+                "english": "Be sure to be ; or mind you are.",
+                "latin": "Fac ut sis ; or, fac sis",
+                "literal_or_explanation": "Fac ut sis ; or, fac sis.",
+                "section_ref": None
+            }
+        ]
+    }
+]
+
+def normalize_obj(o):
+    if isinstance(o, str):
+        return unicodedata.normalize('NFC', o)
+    elif isinstance(o, list):
+        return [normalize_obj(x) for x in o]
+    elif isinstance(o, dict):
+        return {k: normalize_obj(v) for k, v in o.items()}
+    return o
+
+doc = {
+    "title": "Table of Differences of Idiom, &c.",
+    "author": "Thomas Kerchever Arnold, edited by J. A. Spencer",
+    "work": "A Practical Introduction to Latin Prose Composition",
+    "pages": "202-210",
+    "total_idioms": len(latin_idioms),
+    "idioms": normalize_obj(latin_idioms)
+}
+
+output_path = Path("OCR/ArnoldLatinIdiom/arnold_latin_table_of_idioms.json")
+with open(output_path, "w", encoding="utf-8") as f:
+    json.dump(doc, f, ensure_ascii=False, indent=2)
+
+print(f"Successfully exported {len(latin_idioms)} Latin idioms to {output_path}")
